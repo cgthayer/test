@@ -1,0 +1,111 @@
+<script>
+
+function like_display_saved(target_type, target_id) {
+    var like_id = "like-" + target_type + "-" + target_id;
+    $('#' + like_id + '-icon').attr("class", "fa fa-thumbs-up");
+    $('#' + like_id + '-text').text("Liked");
+    $('#' + like_id + '-link').attr(
+	"onclick",
+	"return like_clear_ajax('" + target_type + "', " + target_id + ")"
+    );
+    $('#' + like_id + '-icon').animateCss('rubberBand');
+}
+
+function like_display_cleared(target_type, target_id) {
+    var like_id = "like-" + target_type + "-" + target_id;    
+    $('#' + like_id + '-icon').attr("class", "fa fa-thumbs-o-up");
+    $('#' + like_id + '-text').text("Like");
+    $('#' + like_id + '-link').attr(
+	"onclick",
+	"return like_save_ajax('" + target_type + "', " + target_id + ")"
+    );
+    $('#' + like_id + '-icon').animateCss('rubberBand');
+}
+
+function like_get_ajax(target_type, target_id) {
+    var like_id = "like-" + target_type + "-" + target_id
+    var url = "{% url 'like_get_ajax' %}?target_type=" + target_type + "&target_id=" + target_id
+    $.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("like_get got errors, "
+			    + target_type + "-" + target_id
+			    + " boo! " + json['errors']);
+	    } else {
+		console.log(json);
+		if (json.is_liked >= 1) {
+		    console.log("found for " + target_type + "-" + target_id);
+		    like_display_saved(target_type, target_id);
+		} else {
+		    console.log("liked absent for " + target_type + "-" + target_id);
+		    like_display_cleared(target_type, target_id);
+		}
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("like_get: Error caught for " + target_type + "-" + target_id);
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+    });
+};
+
+function like_save_ajax(target_type, target_id) {
+    var url = "{% url 'like_save_ajax' %}?target_type=" + target_type + "&target_id=" + target_id
+    $.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("like_save got errors for " + target_type + "-" + target_id
+			    + ", boo! " + json['errors']);
+	    } else {
+		console.log("like saved for " + target_type + "-" + target_id);
+		like_display_saved(target_type, target_id);
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("like_save: Error caught  :( for "
+			+ target_type + "-" + target_id);
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+    });
+    return false;
+};
+
+function like_clear_ajax(target_type, target_id) {
+    var url = "{% url 'like_clear_ajax' %}?target_type=" + target_type + "&target_id=" + target_id
+    $.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("like_clear got errors for "
+			    + target_type + "-" + target_id
+			    + ", boo! " + json['errors']);
+	    } else {
+		console.log("like cleared for "
+			    + target_type + "-" + target_id);
+		like_display_cleared(target_type, target_id);
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("like_clear: Error caught  :(");
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+    });
+    console.log("like_clear: all done");
+    return false;
+};
+
+</script>

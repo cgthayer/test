@@ -1,0 +1,113 @@
+<script>
+
+function bookmark_display_saved(target_type, target_id) {
+    var bookmark_id = "bookmark-" + target_type + "-" + target_id;
+    $('#' + bookmark_id + '-icon').attr("class", "fa fa-bookmark");
+    $('#' + bookmark_id + '-text').text("Saved");
+    $('#' + bookmark_id + '-link').attr(
+	"onclick",
+	"return bookmark_clear_ajax('" + target_type + "', " + target_id + ")"
+    );
+    // needs animate.css
+    $('#' + bookmark_id + '-icon').animateCss('rubberBand');
+}
+
+function bookmark_display_cleared(target_type, target_id) {
+    var bookmark_id = "bookmark-" + target_type + "-" + target_id;    
+    $('#' + bookmark_id + '-icon').attr("class", "fa fa-bookmark-o");
+    $('#' + bookmark_id + '-text').text("Save");
+    $('#' + bookmark_id + '-link').attr(
+	"onclick",
+	"return bookmark_save_ajax('" + target_type + "', " + target_id + ")"
+    );
+    // needs animate.css
+    $('#' + bookmark_id + '-icon').animateCss('rubberBand');
+}
+
+function bookmark_get_ajax(target_type, target_id) {
+    var bookmark_id = "bookmark-" + target_type + "-" + target_id
+    var url = "{% url 'bookmark_get_ajax' %}?target_type=" + target_type + "&target_id=" + target_id
+    $.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("bookmark_get got errors, "
+			    + target_type + "-" + target_id
+			    + " boo! " + json['errors']);
+	    } else {
+		console.log(json);
+		if (json.is_bookmarked >= 1) {
+		    console.log("found for " + target_type + "-" + target_id);
+		    bookmark_display_saved(target_type, target_id);
+		} else {
+		    console.log("bookmarked absent for " + target_type + "-" + target_id);
+		    bookmark_display_cleared(target_type, target_id);
+		}
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("bookmark_get: Error caught for " + target_type + "-" + target_id);
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+    });
+};
+
+function bookmark_save_ajax(target_type, target_id) {
+    var url = "{% url 'bookmark_save_ajax' %}?target_type=" + target_type + "&target_id=" + target_id
+    $.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("bookmark_save got errors for " + target_type + "-" + target_id
+			    + ", boo! " + json['errors']);
+	    } else {
+		console.log("bookmark saved for " + target_type + "-" + target_id);
+		bookmark_display_saved(target_type, target_id);
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("bookmark_save: Error caught  :( for "
+			+ target_type + "-" + target_id);
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+    });
+    return false;
+};
+
+function bookmark_clear_ajax(target_type, target_id) {
+    var url = "{% url 'bookmark_clear_ajax' %}?target_type=" + target_type + "&target_id=" + target_id
+    $.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("bookmark_clear got errors for "
+			    + target_type + "-" + target_id
+			    + ", boo! " + json['errors']);
+	    } else {
+		console.log("bookmark cleared for "
+			    + target_type + "-" + target_id);
+		bookmark_display_cleared(target_type, target_id);
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("bookmark_clear: Error caught  :(");
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+    });
+    console.log("bookmark_clear: all done");
+    return false;
+};
+
+</script>
