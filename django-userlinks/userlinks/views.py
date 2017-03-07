@@ -21,6 +21,12 @@ def name_to_ct(name):
 # Likes
 
 def like_get_ajax(request, target_type=None, target_id=None):
+    """Ajax/Json gets counts of likes where result has members:
+    is_liked: set if logged in, 1 for true, 0 for not bookmarked
+        by this user
+    likes_count: number of users who have bookmarked this
+    """
+    
     result = {}
     if not target_type:
         target_type = request.GET.get('target_type')
@@ -47,8 +53,10 @@ def like_get_ajax(request, target_type=None, target_id=None):
         
 
 def _like(request, target_type, target_id, is_like):
-    """Does the work for like"""
-        
+    """Does the work for like-ing or un-like-ing.
+    Assumes a real logged in user.  Non-atomic but
+    isolated to a single user.
+    """
     likes = UserLink.objects.filter(
         user=request.user,
         link_type=UserLink.LIKES,
@@ -68,10 +76,12 @@ def _like(request, target_type, target_id, is_like):
         )
         like.save()
 
+    # TODO: add signal
     return JsonResponse({})
 
 @login_required
 def like_save_ajax(request, target_type=None, target_id=None):
+    """Call for a user to like an object"""
     if not target_type:
         target_type = request.GET.get('target_type')
     if not target_id:
@@ -80,6 +90,7 @@ def like_save_ajax(request, target_type=None, target_id=None):
 
 @login_required
 def like_clear_ajax(request, target_type=None, target_id=None):
+    """Call for a user to unlike an object"""
     if not target_type:
         target_type = request.GET.get('target_type')
     if not target_id:
@@ -90,13 +101,13 @@ def like_clear_ajax(request, target_type=None, target_id=None):
 ######################################################################
 # Bookmarks / Saves
 
-# todo: this moved to utils
 @login_required
 def bookmark_list_ajax(request):
-    """output:
-    bookmarks: a list of bookmarks for the user
-    
-    Each bookmark object has updated_on, target_table, target_id
+    """Returns a list of bookmarks (result['bookmarks']) for the current user.
+
+    Each bookmark object has updated_on, content_type (int), name (of
+    content_type), model (name), object_id
+
     """
     result = {}
 
@@ -107,16 +118,20 @@ def bookmark_list_ajax(request):
         user=request.user,
         link_type=UserLink.BOOKMARKED,
     )
+    for b in bookmarks:
+        b.name = b.content_type.name
+        b.model = b.content_type.model
 
     result['bookmarks'] = bookmarks
     return JsonResponse(result)
 
+
 @login_required
 def bookmark_get_ajax(request, target_type=None, target_id=None):
-    """output:
+    """Ajax/Json gets counts of bookmarks where result has members:
     is_bookmarked: set if logged in, 1 for true, 0 for not bookmarked
         by this user
-    bookmarks_count:  number of users who have bookmarked this
+    bookmarks_count: number of users who have bookmarked this
     """
     result = {}
     if not target_type:
@@ -164,10 +179,8 @@ def _bookmark(request, target_type, target_id, set_bookmarked):
             object_id=target_id,
         )
         bookmark.save()
-        # TODO: engagement
-    else:
-        pass
-        # TODO: engagement
+
+    # TODO: add signal
     return JsonResponse({})
 
 
