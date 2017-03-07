@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from .models import UserLink
 from .utils import (
-    model_to_content_type,
+    model_to_ct,
     get_bookmarks, get_likes, get_links, who_cares,
 )
 

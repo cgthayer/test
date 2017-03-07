@@ -2,20 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
-from adventures.models import Adventure, Spot, Tip
-
 from .models import UserLink
-from .utils import model_to_content_type
-
-
-def name_to_ct(name):
-    if name == 'spot':
-        return model_to_content_type(Spot)
-    if name == 'adventure':
-        return model_to_content_type(Adventure)
-    if name == 'tip':
-        return model_to_content_type(Tip)
-
+from .utils import model_to_ct
 
 ######################################################################
 # Likes
@@ -38,14 +26,14 @@ def like_get_ajax(request, target_type=None, target_id=None):
         result['is_liked'] = UserLink.objects.filter(
             user=request.user,
             link_type=UserLink.LIKES,
-            content_type=name_to_ct(target_type),
+            content_type=model_to_ct(target_type),
             object_id=target_id,
         ).count()
 
     # for all users
     result['likes_count'] = UserLink.objects.filter(
         link_type=UserLink.LIKES,
-        content_type=name_to_ct(target_type),
+        content_type=model_to_ct(target_type),
         object_id=target_id,
     ).count()
     
@@ -60,7 +48,7 @@ def _like(request, target_type, target_id, is_like):
     likes = UserLink.objects.filter(
         user=request.user,
         link_type=UserLink.LIKES,
-        content_type=name_to_ct(target_type),
+        content_type=model_to_ct(target_type),
         object_id=target_id,
     )
     # delete to clear out and reset updated_on times
@@ -71,7 +59,7 @@ def _like(request, target_type, target_id, is_like):
         like = UserLink(
             user=request.user,
             link_type=UserLink.LIKES,
-            content_type=name_to_ct(target_type),
+            content_type=model_to_ct(target_type),
             object_id=target_id,
         )
         like.save()
@@ -144,14 +132,14 @@ def bookmark_get_ajax(request, target_type=None, target_id=None):
         result['is_bookmarked'] = UserLink.objects.filter(
             user=request.user,
             link_type=UserLink.BOOKMARKED,
-            content_type=name_to_ct(target_type),
+            content_type=model_to_ct(target_type),
             object_id=target_id,
         ).count()
         
     # for all users
     result['bookmarks_count'] = UserLink.objects.filter(
         link_type=UserLink.BOOKMARKED,
-        content_type=name_to_ct(target_type),
+        content_type=model_to_ct(target_type),
         object_id=target_id,
     ).count()
     
