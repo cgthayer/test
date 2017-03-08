@@ -32,7 +32,7 @@ class LinkTests(TestCase):
         like_link = UserLink(
             user=cls.user,
             link_type=UserLink.LIKES,
-            content_type=model_to_content_type(User),
+            content_type=model_to_ct(User),
             content_object=other_user,
             object_id=other_user.id,
         )
@@ -49,7 +49,7 @@ class LinkTests(TestCase):
         bookmark_link = UserLink(
             user=cls.user,
             link_type=UserLink.BOOKMARKED,
-            content_type=model_to_content_type(User),
+            content_type=model_to_ct(User),
             content_object=user_carl,
             object_id=user_carl.id,
         )

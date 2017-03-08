@@ -21,7 +21,7 @@ class UserLink(models.Model):
         choices = (
             (LIKES, 'Likes'),
             (BOOKMARKED, 'Bookmarked'),
-            (VISITED, 'Visited'),
+            (BEEN_TO, 'Visited'),
         )
     )
     updated_on = models.DateTimeField(
@@ -40,11 +40,11 @@ class UserLink(models.Model):
     )
                                        
 
-# class UserRatingMixin(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-#     rating = models.IntegerField(blank=True, null=True)
-#     updated_on = models.DateTimeField(
-#         auto_now_add=True,
-#     )
-#     class Meta:
-#         abstract = True
+class UserRatingMixin(models.Model):
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    rating = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(
+        auto_now_add=True,
+    )
+    class Meta:
+        abstract = True

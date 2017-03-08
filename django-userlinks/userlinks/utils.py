@@ -71,7 +71,7 @@ def get_likes(user, target_model=None):
         return UserLink.objects.filter(
             user=user,
             link_type=UserLink.LIKES,
-            content_type=model_to_content_type(target_model),
+            content_type=model_to_ct(target_model),
         )
     return UserLink.objects.filter(
         user=user,
@@ -85,9 +85,8 @@ def get_liked_objects(user, target_model=None):
 
 def get_links(target_model, target_id):
     """Return a list of links to  this target_table/target_id combo by anyone"""
-    content_type=model_to_content_type(target_model)
     return UserLink.objects.filter(
-        content_type=model_to_content_type(target_model),
+        content_type=model_to_ct(target_model),
         object_id=target_id,
     )
 
