@@ -1,6 +1,6 @@
+<!-- requires jquery and animate.css (http://daneden.me/animate) -->
 <script>
-
-function bookmark_display_saved(target_type, target_id) {
+    function bookmark_display_saved(target_type, target_id) {
     var bookmark_id = "bookmark-" + target_type + "-" + target_id;
     $('#' + bookmark_id + '-icon').attr("class", "fa fa-bookmark");
     $('#' + bookmark_id + '-text').text("Saved");
@@ -109,5 +109,4 @@ function bookmark_clear_ajax(target_type, target_id) {
     console.log("bookmark_clear: all done");
     return false;
 };
-
 </script>

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.forms.models import model_to_dict
 from django.shortcuts import render
 
 from .models import UserLink
@@ -8,6 +9,34 @@ from .utils import model_to_ct
 ######################################################################
 # Likes
 
+@login_required
+def like_list_ajax(request):
+    """Returns a list of likes (result['likes']) for the current user.
+
+    Each like object has updated_on, content_type (int), name (of
+    content_type), model (name), object_id
+
+    """
+    result = {}
+
+    if not request.user.is_authenticated or request.user.is_anonymous():
+        return JsonResponse(result)
+
+    likes = UserLink.objects.filter(
+        user=request.user,
+        link_type=UserLink.LIKES,
+    )
+    likes_dict = []
+    for like in likes:
+        d = model_to_dict(like)
+        d['name'] = like.content_type.name
+        d['model'] = like.content_type.model
+        likes_dict.append(d)
+
+    result['likes'] = likes_dict
+    return JsonResponse(result)
+
+@login_required
 def like_get_ajax(request, target_type=None, target_id=None):
     """Ajax/Json gets counts of likes where result has members:
     is_liked: set if logged in, 1 for true, 0 for not bookmarked
@@ -106,11 +135,14 @@ def bookmark_list_ajax(request):
         user=request.user,
         link_type=UserLink.BOOKMARKED,
     )
+    bookmarks_dict = []
     for b in bookmarks:
-        b.name = b.content_type.name
-        b.model = b.content_type.model
+        d = model_to_dict(b)
+        d['name'] = b.content_type.name
+        d['model'] = b.content_type.model
+        bookmarks_dict.append(d)
 
-    result['bookmarks'] = bookmarks
+    result['bookmarks'] = bookmarks_dict
     return JsonResponse(result)
 
 
@@ -151,7 +183,7 @@ def _bookmark(request, target_type, target_id, set_bookmarked):
     bookmarks = UserLink.objects.filter(
         user=request.user,
         link_type=UserLink.BOOKMARKED,
-        content_type=name_to_ct(target_type),
+        content_type=model_to_ct(target_type),
         object_id=target_id,
     )
 
@@ -163,7 +195,7 @@ def _bookmark(request, target_type, target_id, set_bookmarked):
         bookmark = UserLink(
             user=request.user,
             link_type=UserLink.BOOKMARKED,
-            content_type=name_to_ct(target_type),
+            content_type=model_to_ct(target_type),
             object_id=target_id,
         )
         bookmark.save()

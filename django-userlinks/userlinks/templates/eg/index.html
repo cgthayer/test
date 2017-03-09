@@ -1,0 +1,124 @@
+<html>
+  <head>
+    <!-- requires jquery, if you don't already have it -->
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+
+    <!-- requires animate.css, we provide a static copy but you may have your own -->
+    {% load static %}
+    <link href="{% static 'userlinks/css/daneden.github.io-animate.css' %}" rel="stylesheet" type="text/css"/>
+    <script>
+    $.fn.extend({
+      animateCss: function (animationName) {
+        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+        this.addClass('animated ' + animationName).one(animationEnd, function() {
+          $(this).removeClass('animated ' + animationName);
+        });
+      }
+    });
+    </script>
+
+    <!-- requires fontawesome, please get your own credential -->
+    <script src="https://use.fontawesome.com/8cbb94e6b1.js"></script>
+    
+    {% include 'userlinks_bookmarks_js.html' %}
+    {% include 'userlinks_likes_js.html' %}
+  </head>
+  <body>
+    <p>
+      Hi, this is a sample for django-userlinks.  It's a basic page to
+      demonstrate like and bookmark. It does this using the logged in
+      user, like-ing themselves. You can look in
+      the <a href="/admin">Admin</a> interface to see the results in
+      the db.
+    </p>
+    
+    <p>
+      You are "{{ user }}".
+    </p>
+
+    <h2>Click to like or bookmark yourself</h2>
+      {% if request.user.is_authenticated %}
+      <a href="#" id="like-auth_user-{{ user.id }}-link" onclick=""
+	 ><span
+	     id="like-auth_user-{{ user.id }}-icon"
+	     class="fa fa-thumbs-o-up"
+	     aria-hidden="true"
+	     ></span>&nbsp;<span
+			      id="like-auth_user-{{ user.id }}-text"></span></a>
+      &nbsp;
+      <a href="#" id="bookmark-auth_user-{{ user.id }}-link" onclick=""
+	 ><span
+	     id="bookmark-auth_user-{{ user.id }}-icon"
+	     class="fa fa-bookmark-o"
+	     aria-hidden="true"
+	     ></span>&nbsp;<span
+			      id="bookmark-auth_user-{{ user.id }}-text">...</span></a>
+      <script>
+	bookmark_get_ajax('auth_user', {{ user.id }});
+	like_get_ajax('auth_user', {{ user.id }});
+      </script>
+      {% else %}
+        Woops, you don't seem to be logged in?  or django.auth.contrib isn't setup?
+      {% endif %}
+    </p>
+
+    <h2>Output</h2>
+    Reload to see updates
+    <ul>
+      <li>Likes:
+      <span id="scratch_output_likes">----</span>
+      <script>
+	var url = "{% url 'like_list_ajax' %}?target_type=auth_user"
+	$.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("like_get got errors, auth_user-{{ user.id }}"
+			    + " boo! " + json['errors']);
+	    } else {
+	       console.log(json);
+  	       $('#scratch_output_likes').text('got ' + JSON.stringify(json));
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("like_get: Error caught");
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+	});
+      </script>
+      </li>
+      <li>Bookmarks:
+      <span id="scratch_output_bookmarks">----</span>
+      <script>
+	var url = "{% url 'bookmark_list_ajax' %}?target_type=auth_user"
+	$.ajax({
+	url : url,
+	type : "GET",
+	data : { },
+	// handle a successful response
+	success : function(json) {
+	    if (json['errors']) {
+		console.log("bookmark_get got errors, auth_user-{{ user.id }}"
+			    + " boo! " + json['errors']);
+	    } else {
+	       console.log(json);
+  	       $('#scratch_output_bookmarks').text('got ' + JSON.stringify(json));
+	    }
+	},
+	// handle a non-successful response
+	error : function(xhr,errmsg,err) {
+	    console.log("bookmark_get: Error caught");
+	    console.log(xhr.status + ": " + xhr.responseText);
+	}
+	});
+      </script>
+      </li>
+    </ul>
+    </p>
+
+  </body>
+</html>

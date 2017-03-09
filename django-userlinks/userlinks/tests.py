@@ -6,7 +6,7 @@ from django.test import TestCase
 from .models import UserLink
 from .utils import (
     model_to_ct,
-    get_bookmarks, get_likes, get_links, who_cares,
+    get_bookmarks, get_likes, get_liked_objects, get_links, who_cares,
 )
 
 class LinkTests(TestCase):
@@ -65,6 +65,9 @@ class LinkTests(TestCase):
         self.assertTrue(len(likes) > 0)
         likes = get_likes(LinkTests.user, User)
         self.assertTrue(len(likes) > 0)
+        likes = get_liked_objects(LinkTests.user, User)
+        self.assertTrue(len(likes) > 0)
+        self.assertTrue(likes[0].username == LinkTests.other_user.username)
 
     def test_bookmarks(self):
         bookmarks = get_bookmarks(LinkTests.user, User)
