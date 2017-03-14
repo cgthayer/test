@@ -2,14 +2,14 @@ from django.conf.urls import url
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import TemplateView
 
-from views import (
+from .ajax import (
     like_list_ajax, like_get_ajax,
     like_save_ajax, like_clear_ajax,
     bookmark_list_ajax, bookmark_get_ajax,
     bookmark_save_ajax, bookmark_clear_ajax,
 )
 
-# app_name = 'userlinks'
+app_name = 'userlinks'
 
 urlpatterns = [
     url(r'ajax/like_list/$',
